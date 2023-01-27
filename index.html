@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Titel-Tag</title>
+
+  <!-- Bootstrap -->
+  <link href="css/bootstrap.min.css" rel="stylesheet">
+  <link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Navigation bar -->
+  <div class="pos-f-t">
+    <nav class="navbar navbar-dark bg-dark">
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggleExternalContent" aria-controls="navbarToggleExternalContent" aria-expanded="false" aria-label="Toggle navigation" id="Dropdown">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <label id="dat" class="dateAndTime">00:00 00.00.0000</label>
+      <button class = "btn btn-success" onclick="ToggleAll(event);" style="width:20%">DOWN</button>
+    </nav>
+    <div class="collapse" id="navbarToggleExternalContent">
+      <div class="bg-light p-4">
+        <a class="dropdown-item" href="#" onclick="CreateButton('blind'+currentId, true);">New Blind</a>
+        <a class="dropdown-item" href="#" onclick="DeleteBlind();">Delete Blind</a>
+        <a class="dropdown-item" href="#" onclick="Info();">Info</a>
+        <a class="dropdown-item" href="#" onclick="Overview();">Overview</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Configurator -->
+  <!-- Modal New blind-->
+  <div class="modal hide fade in" data-keyboard="false" data-backdrop="static" id="ModalBlind" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLongTitle">New blind</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="DeleteButton('blind'+ currentId);">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="input-group input-group-sm mb-3">
+            <div class="input-group-prepend">
+              <span class="input-group-text" style="width: 100px;">Name</span>
+            </div>
+            <input type="text" class="form-control" id="blindName" aria-label="Name" aria-describedby="inputGroup-sizing-sm">
+          </div>
+          <div class="input-group input-group-sm mb-3">
+            <div class="input-group-prepend">
+              <span class="input-group-text" style="width: 100px;">Contactor ID</span>
+            </div>
+            <input type="text" class="form-control"  id="blindContactorId" aria-label="Contactor ID" aria-describedby="inputGroup-sizing-sm">
+          </div>
+          <div class="input-group input-group-sm mb-3">
+            <div class="input-group-prepend">
+              <span class="input-group-text" style="width: 100px;">Input ID</span>
+            </div>
+            <input type="text" class="form-control"  id="blindInputId" aria-label="Input ID" aria-describedby="inputGroup-sizing-sm">
+          </div>
+          <div class="input-group input-group-sm mb-3">
+            <div class="input-group-prepend">
+              <span class="input-group-text" style="width: 100px;">Up time [s]</span>
+            </div>
+            <input type="text" class="form-control" id="blindUpTime" aria-label="Up time [s]" aria-describedby="inputGroup-sizing-sm">
+          </div>
+          <div class="input-group input-group-sm mb-3">
+            <div class="input-group-prepend">
+              <span class="input-group-text" style="width: 100px;">Down time [s]</span>
+            </div>
+            <input type="text" class="form-control" id="blindDownTime" aria-label="Down time [s]" aria-describedby="inputGroup-sizing-sm">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="DeleteButton('blind'+ currentId);">Close</button>
+          <button type="button" class="btn btn-primary" onclick="CreateBlindAndRenameButton('blind'+currentId);">Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!--Buttons-->
+  <div id="MainLayout" class="container-fluid" style="padding-right: 0px; padding-left: 0px;">
+    <div id = "r" class="row">
+      <div id="c" class="col"></div>
+    </div>
+  </div>
+
+<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+<script src="node_modules/jquery/dist/jquery.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src = "js/model.js"></script>
+<script src="js/index.js"></script>
+</body>
+</html>

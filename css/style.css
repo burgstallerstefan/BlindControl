@@ -1,0 +1,9 @@
+.dateAndTime{
+   margin-right: 30%;
+   color: white;
+}
+.open>.dropdown-menu{
+   text-align: center;
+   left: 50%;
+   transform: translate3d(-50%,0,0);
+}
