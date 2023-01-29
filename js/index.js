@@ -157,6 +157,22 @@ function UpdateClock() {
 }
 UpdateClock(); // initial call
 
-function Update(){
-    
-}
+function Update() {
+    $.ajax({
+      url: '/data?Command=set&Content=Update',
+      type: 'GET',
+      success: function (result) {
+        console.log(result);
+        alert("Update in progress. Please wait for server restart.");
+        $.ajax({
+          url: '/Update.sh',
+          type: 'GET',
+          success: function (result) {
+            console.log(result);
+            alert("Update complete.");
+          }
+        });
+      }
+    });
+  }
+  
