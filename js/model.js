@@ -49,7 +49,7 @@ function updateConfigJson(){
     data["Command"] = "set";
     data["Content"] = JSON.stringify(config);
     $.ajax({
-        url: "http://localhost:3000/data",
+        url: "http://"+ip+":3000/data",
         type: "GET",
         data: data,
         dataType: 'json',
