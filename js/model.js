@@ -1,6 +1,7 @@
 var config = {};
 config["User"] = {};
 config["Blinds"] = [];
+ip = "192.168.10.2"
 
 class Blind{
     constructor(name, pin, port, uptime, downtime, htmlId){
@@ -24,7 +25,7 @@ function getConfig(){
     data["Command"] = "get";
     data["Content"] = "{}";
     $.ajax({
-        url: "http://localhost:3000/data",
+        url: "http://"+ip+":3000//data",
         type: "GET",
         data: data,
         dataType: 'json',
