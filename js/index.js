@@ -156,3 +156,7 @@ function UpdateClock() {
     setTimeout(UpdateClock, 200);
 }
 UpdateClock(); // initial call
+
+function Update(){
+    
+}

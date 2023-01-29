@@ -9,9 +9,11 @@ class Blind{
         this.port = port;
         this.uptime = uptime;
         this.downtime = downtime;
+        this.uptimeLeft = 0;
+        this.downtimeLeft = 0;
         this.htmlId = htmlId;
     }
-    area(){
+    moveUp(){
         return 0;
     }
 }
