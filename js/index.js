@@ -159,13 +159,13 @@ UpdateClock(); // initial call
 
 function Update() {
 	$.ajax({
-	  url: '/Update.sh',
+	  url: 'http://192.168.10.2:3000//Update.sh',
 	  type: 'GET',
 	  success: function (result) {
 		console.log(result);
-		alert("Update complete.");
+		alert(result);
 	  }
 	});
-  }
+}
   
   

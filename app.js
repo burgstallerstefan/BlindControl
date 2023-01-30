@@ -43,6 +43,18 @@ app.use("/",express.static(__dirname));
 
 app.get("/data",sendJson);  // defining data as the get endpoint instead of root
 
+app.get('/Update.sh', (req, res) => {
+  child_process.exec('bash Update.sh', (err, stdout, stderr) => {
+    if (err) {
+      console.error(err);
+      res.send('Update failed');
+    } else {
+      console.log(stdout);
+      res.send('Update complete');
+    }
+  });
+});
+
 app.listen(port, host, () => {
   console.log(`Server is running at ${host}:${port}`);
 });
