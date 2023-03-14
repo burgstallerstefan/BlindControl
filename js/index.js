@@ -191,7 +191,7 @@ UpdateClock(); // initial call
 
 function Update() {
 	$.ajax({
-	  url: 'http://'+serverIp+':3000//Update.sh',
+	  url: 'http://'+serverIp+':'+port+'//Update.sh',
 	  type: 'GET',
 	  success: function (result) {
 		console.log(result);

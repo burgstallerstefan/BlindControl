@@ -75,7 +75,7 @@ function updateConfigJson(){
     data["Command"] = "set";
     data["Content"] = JSON.stringify(config);
     $.ajax({
-        url: "http://"+serverIp+":3000/data",
+        url: "http://"+serverIp+":"+port+"/data",
         type: "GET",
         data: data,
         dataType: 'json',
@@ -126,7 +126,7 @@ async function setNetwork(network){
     data["Command"] = "setNetwork";
     data["Content"] = network;
     await $.ajax({
-        url: "http://"+serverIp+":3000/data",
+        url: "http://"+serverIp+":"+port+"/data",
         type: "GET",
         data: data,
         dataType: 'json',
@@ -159,7 +159,7 @@ async function switchShelly(shellyIp, id, state){
     data["Command"] = "switchShelly";
     data["Content"] = {ip:shellyIp,id:id,state:state};
     await $.ajax({
-        url: "http://"+serverIp+":3000/shelly",
+        url: "http://"+serverIp+":"+port+"/shelly",
         type: "GET",
         data: data,
         dataType: 'json',
