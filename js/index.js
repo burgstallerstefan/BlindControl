@@ -1,5 +1,6 @@
 var mode = 0;
 var currentId = 0;
+var clickedId = 0;
 
 // Reset to normal mode if click anywhere
 document.addEventListener('click', function(event) {
@@ -9,12 +10,12 @@ document.addEventListener('click', function(event) {
     var dropdown = document.getElementById("navbarToggleExternalContent");
     var outsideClickDropdown = !dropdown.contains(event.target);
     var outsideClickButtons = !event.target.id.includes("blind");
-    console.log("Outside dropdown: " + outsideClickDropdown)
-    console.log("Outside buttons: " + outsideClickButtons)
+    console.log("Outside dropdown: " + outsideClickDropdown);
+    console.log("Outside buttons: " + outsideClickButtons);
     console.log("Previous mode: " + mode);
     if(outsideClickDropdown && outsideClickDropdownButton && outsideClickButtons){
         console.log("DeleteBlind");
-        console.log(config)
+        console.log(config);
         for(blind of config.Blinds){
             var htmlId = "blind" + blind.htmlId;
             btn = document.getElementById(htmlId);
@@ -29,24 +30,36 @@ getConfig();
 
 console.log(config);
 
+function _findBlind(htmlId){
+    for(blind of config.Blinds){
+        if("blind"+blind.htmlId === htmlId){
+            return blind;
+        }
+    }
+    return null;
+}
+
 function blindClicked(event){
     var htmlId = event.target.id;
+    var blind = _findBlind(htmlId)
+    if(blind == null) return;
+    clickedId = blind.htmlId;
     console.log("HtmlID = " + htmlId);
+
     switch(mode){
         case 0: /* Normal mode */
-        break;
-        case 1: /* Info mode */
-            for(blind of config.Blinds){
-                if("blind"+blind.htmlId == htmlId){
-                    document.getElementById("blindName").value = blind.name;
-                    document.getElementById("blindInputId").value = blind.pin;
-                    document.getElementById("blindContactorId").value = blind.port;
-                    document.getElementById("blindDownTime").value = blind.downtime;
-                    document.getElementById("blindUpTime").value = blind.uptime;
-                }
-                $('#ModalBlind').modal('show');
-            }
-        break;
+            blind.toggle()
+            break;
+        case 1: /* Info mode */    
+            document.getElementById("blindNetworkSSID").value = blind.network.ssid
+            document.getElementById("blindNetworkPassword").value = blind.network.password
+            document.getElementById("blindName").value = blind.name;
+            document.getElementById("blindIp").value = blind.ip;
+            document.getElementById("blindDownTime").value = blind.downtime;
+            document.getElementById("blindUpTime").value = blind.uptime;
+                
+            $('#ModalBlind').modal('show');
+            break;
         case 2: /* Delete mode */
             DeleteButton(htmlId);
             for(blind of config.Blinds){
@@ -60,7 +73,7 @@ function blindClicked(event){
                     break;
                 } 
             }
-        break;
+            break;
         default:break;
     }
 }
@@ -78,6 +91,8 @@ function CreateButton(htmlId, dialog){
     btn.style.marginTop = "50px";
     btn.onclick = blindClicked;
     c.appendChild(btn);
+    getNetworks()
+    $("#blindIp").val(getAvailableIp);
     if(dialog){
         $('#ModalBlind').modal('show');
     }
@@ -120,16 +135,31 @@ function Info(){
     mode = 1;
 }
 
-function CreateBlindAndRenameButton(htmlId){
+function SaveChanges(htmlId, newBlind){
+    var networkSSID = document.getElementById("blindNetworkSSID").value;
+    var networkPassword = document.getElementById("blindNetworkPassword").value;
+    var network = {
+        ssid: networkSSID,
+        password: networkPassword
+    };
     var name = document.getElementById("blindName").value;
-    var pin = parseInt(document.getElementById("blindInputId").value);
-    var port = parseInt(document.getElementById("blindContactorId").value);
+    var ip = document.getElementById("blindIp").value;
     var downTime = parseInt(document.getElementById("blindDownTime").value);
     var upTime = parseInt(document.getElementById("blindUpTime").value);
-    var blind = new Blind(name, pin, port, upTime, downTime, currentId);
-    config["Blinds"].push(blind);
+
+    var blind = new Blind(network, name, ip, upTime, downTime, currentId);
+
+    if(newBlind){
+        config["Blinds"].push(blind);
+        currentId = currentId + 1;
+    }else{
+        var b = _findBlind(htmlId)
+        if(b==null) return;
+        if(b.networkSSID != networkSSID || b.ip != ip)
+        Object.assign(b, blind);
+    }
     RenameButton(htmlId, name);
-    currentId = currentId + 1;
+    
     $('#ModalBlind').modal('hide');
     updateConfigJson();
 }
@@ -138,8 +168,10 @@ function ToggleAll(event){
     this.up = !this.up;
     var btn = event.target || event.srcElement; // IE
     if(this.up){
+        moveAllDown();
         btn.textContent = "UP"
     }else{
+        moveAllUp();
         btn.textContent = "DOWN"
     }
 }
@@ -159,7 +191,7 @@ UpdateClock(); // initial call
 
 function Update() {
 	$.ajax({
-	  url: 'http://192.168.10.2:3000//Update.sh',
+	  url: 'http://'+serverIp+':3000//Update.sh',
 	  type: 'GET',
 	  success: function (result) {
 		console.log(result);
