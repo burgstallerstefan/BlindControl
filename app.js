@@ -168,7 +168,7 @@ app.get("/data",sendJson);  // defining data as the get endpoint instead of root
 app.get("/shelly",sendJson);  // defining data as the get endpoint instead of root
 
 app.get('/Update.sh', (req, res) => {
-  child_process.exec('bash Update.sh', (err, stdout, stderr) => {
+  child_process.exec('sh Update.sh', (err, stdout, stderr) => {
     if (err) {
       console.error(err);
       res.send('Update failed');
