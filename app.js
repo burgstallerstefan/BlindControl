@@ -11,6 +11,9 @@ const wifi = require('wifi-control');
 var fs = require('fs');
 var app = express();
 
+const port = 3000
+const host = "0.0.0.0";
+
 // WLAN-Schnittstelle initialisieren
 wifi.init({
   debug: true
@@ -175,7 +178,6 @@ app.get('/Update.sh', (req, res) => {
     }
   });
 });
-
 app.listen(port, host, () => {
   console.log(`Server is running at ${host}:${port}`);
 });
