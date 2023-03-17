@@ -5,7 +5,7 @@ ip = "localhost"
 
 const direction = {
     up: 0,
-    down: 1
+    down: 1,
   }
 
 class Blind extends Shelly{
@@ -15,30 +15,96 @@ class Blind extends Shelly{
         this.uptime = uptime;
         this.downtime = downtime;
         this.uptimeLeft = 0;
-        this.downtimeLeft = 0;
+        this.downtimeLeft = downtime;
         this.htmlId = htmlId;
+        this.timer = null;
+        this.timerStartedTimestamp = 0;
+        this.direction = direction.down;
+        this.isStopped = true;
     }
+
+    startTimer(timeRemaining) {
+        this.timerStartedTimestamp = Date.now();
+        this.timer = setTimeout(() => {
+            this.stop();            
+        }, timeRemaining);
+    }
+
+    stopTimer() {
+        if (this.timer !== null) {
+            clearTimeout(this.timer);
+            this.timer = null;
+        }
+    }
+
     moveUp(){
-        return 0;
+        this.stopTimer()
+        this.isStopped = false;
+        this.switchShelly(direction.down, false);
+        this.switchShelly(direction.up, true);
+        this.startTimer(this.uptimeLeft);
     }
+
     moveDown(){
-        return 0;
+        this.stopTimer()
+        this.isStopped = false;
+        this.switchShelly(direction.up, false);
+        this.switchShelly(direction.down, true);
+        this.startTimer(this.downtimeLeft);
     }
+
+    stop(){
+        this.stopTimer()
+        this.switchShelly(direction.up, false);
+        this.switchShelly(direction.down, false);
+        this.isStopped = true;
+        var tp = (Date.now()-this.timerStartedTimestamp); // passed time since timer has started
+        if(this.direction == direction.up){
+            this.uptimeLeft = this.uptime-tp;
+            if(this.uptimeLeft < 0){this.uptimeLeft=0;}
+            this.downtimeLeft = (tp/this.uptime) * this.downtime;
+        }else{
+            this.downtimeLeft = this.downtime-tp;
+            if(this.downtimeLeft < 0){this.downtimeLeft=0;}
+            this.uptimeLeft = (tp/this.downtime) * this.uptime;
+        }
+    }
+
     toggle(){
-        return 0;
+        // change direction if is stopped
+        if(this.isStopped){
+            if(this.direction == direction.up){
+                this.direction = direction.down;
+            }else{
+                this.direction = direction.up;
+            }
+        }
+        if(!this.isStopped){
+            this.stop();
+        }
+        else if(this.direction == direction.down){
+            this.moveDown();
+        }else{
+            this.moveUp();
+        }
+
     }
 }
 
 function moveAllDown(){
-    for(b of config.Blinds){
-        blind = new Blind(...b);
+    for(blind of config.Blinds){
+        if(!blind.isStopped){
+            this.stop()
+        }
         blind.moveDown();
     }
 }
 
 function moveAllUp(){
-    for(b of config.Blinds){
-        blind = new Blind(...b);
+    for(blind of config.Blinds){
+        if(!blind.isStopped){
+            this.stop()
+        }
         blind.moveUp();
     }
 }
