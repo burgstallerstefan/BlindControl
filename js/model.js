@@ -40,16 +40,16 @@ class Blind extends Shelly{
     moveUp(){
         this.stopTimer()
         this.isStopped = false;
-        this.switchShelly(direction.down, false);
-        this.switchShelly(direction.up, true);
+        switchShelly(direction.down, false);
+        switchShelly(direction.up, true);
         this.startTimer(this.uptimeLeft);
     }
 
     moveDown(){
         this.stopTimer()
         this.isStopped = false;
-        this.switchShelly(direction.up, false);
-        this.switchShelly(direction.down, true);
+        switchShelly(direction.up, false);
+        switchShelly(direction.down, true);
         this.startTimer(this.downtimeLeft);
     }
 
@@ -163,7 +163,7 @@ function getNetworks(){
         success: function(resp){
             $('#blindNetworkSSID').empty();
             // add new options from response
-            resp.Content.networks.forEach(function(network) {
+            resp.Content.forEach(function(network) {
               var option = $('<option>');
               option.val(network.ssid);
               option.text(network.ssid);

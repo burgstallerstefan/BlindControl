@@ -6,66 +6,43 @@ const wifiPassword = '';
 const wifiGateway = "192.168.10.1"
 const wifiSubnet = "255.255.255.0"
 
+var request= require('request');
 var express = require('express');
-const wifi = require('wifi-control');
+const wifi = require('node-wifi');
 var fs = require('fs');
 var app = express();
+
 
 const port = 3000
 const host = "0.0.0.0";
 
 // WLAN-Schnittstelle initialisieren
 wifi.init({
-  debug: true
+  iface: null,
 });
-
-// Konfiguration des Hotspots
-const hotspotConfig = {
-  ssid: wifiSsid,
-  password: wifiPassword,
-  mode: 'ap',
-};
-
-// Erstellung des Hotspots
-wifi.configure(hotspotConfig, (err) => {
-  if (err) {
-    console.error('Fehler beim Konfigurieren des Hotspots: ', err);
-    return;
-  }
-
-  console.log('Hotspot erfolgreich konfiguriert');
-});
-
-wifi.configure()
 
 async function configureShelly(ip) {
-  url = `http://${shellyDefaultIp}/rpc/WiFi.SetConfig?config={"sta":{"ssid":"${wifiSsid}","pass":"${wifiPassword}","enable":true,"ipv4mode":"static","ip":"${ip}", "netmask":"${wifiSubnet}", "gw":"${wifiGateway}", "nameserver":"8.8.8.8"}}`;
+  url = `http://${shellyDefaultIp}/rpc/WiFi.SetConfig?config={"sta":{"ssid":"${wifiSsid}","pass":"${wifiPassword}","enable":true,"ipv4mode":"dhcp"}}`;
   console.log(url);
-  fetch(url)
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Fehler beim Konfigurieren des Shelly 2PM.');
-      }
-      console.log('Shelly 2PM erfolgreich im STA-Modus mit statischer IP-Adresse konfiguriert.');
-    })
-    .catch(error => {
-      console.error('Fehler:', error);
-    });
+  request(url, (error, response, body) => {
+    if (error) {
+      console.error(error);
+      return;
+    }
+    console.log(JSON.parse(body));
+  });
 }
 
 async function switchShelly(ip, direction, state) {
   url = `http://${ip}/rpc/Switch.Set?id=${direction}&on=${state}`
   console.log(url);
-  fetch(url)
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Fehler beim Schalten des Shelly 2PM.');
-      }
-      console.log('Shelly 2PM erfolgreich geschaltet.');
-    })
-    .catch(error => {
-      console.error('Fehler:', error);
-    });
+  request(url, (error, response, body) => {
+    if (error) {
+      console.error(error);
+      return;
+    }
+    console.log(JSON.parse(body));
+  });
 }
 
 async function handleData(data) {
@@ -97,7 +74,7 @@ async function handleData(data) {
     case "getNetworkList":
       try {
         const scanResults = await new Promise((resolve, reject) => {
-          wifi.scanForWiFi((err, response) => {
+          wifi.scan((err, response) => {
             if (err) reject(err);
             resolve(response);
           });
@@ -118,7 +95,7 @@ async function handleData(data) {
         const password = content["password"];
         console.log("Try set network " + ssid + "   " + password);
         const connected = await new Promise((resolve, reject) => {
-          wifi.connectToAP({ssid, password}, (err) => {
+          wifi.connect({ssid:ssid, password:password}, (err) => {
             if (err) {
               reject(err);
             } else {
@@ -162,6 +139,11 @@ async function sendJson(req, res){
   console.log("OK")
 }
 
+app.use(function(req, res, next){
+	res.header("Access-Control-Allow-Origin","*");
+	res.header("Access-Control-Allow-Headers","Origin, X-Requested-With, Content-Type, Accept");
+	next();
+});
 app.use("/",express.static(__dirname));
 
 app.get("/data",sendJson);  // defining data as the get endpoint instead of root
