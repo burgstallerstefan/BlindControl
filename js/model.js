@@ -40,16 +40,16 @@ class Blind extends Shelly{
     moveUp(){
         this.stopTimer()
         this.isStopped = false;
-        switchShelly(direction.down, false);
-        switchShelly(direction.up, true);
+        this.switchShelly(direction.down, false);
+        this.switchShelly(direction.up, true);
         this.startTimer(this.uptimeLeft);
     }
 
     moveDown(){
         this.stopTimer()
         this.isStopped = false;
-        switchShelly(direction.up, false);
-        switchShelly(direction.down, true);
+        this.switchShelly(direction.up, false);
+        this.switchShelly(direction.down, true);
         this.startTimer(this.downtimeLeft);
     }
 
@@ -165,8 +165,8 @@ function getNetworks(){
             // add new options from response
             resp.Content.forEach(function(network) {
               var option = $('<option>');
-              option.val(network.ssid);
-              option.text(network.ssid);
+              option.val(network);
+              option.text(network);
               $('#blindNetworkSSID').append(option);
         });
     }
@@ -214,13 +214,12 @@ async function configure(shellyIp){
         dataType: 'text',
         success: function(resp){
             console.log(resp.Content);
-            alert(resp.Content);
         }
     });
 }
 
 async function switchShelly(shellyIp, id, state){
-    console.log("configure")
+    console.log("switchShelly")
     var data = {};
     data["Command"] = "switchShelly";
     data["Content"] = {ip:shellyIp,id:id,state:state};
@@ -231,7 +230,6 @@ async function switchShelly(shellyIp, id, state){
         dataType: 'json',
         success: function(resp){
             console.log(resp.Content);
-            alert(resp.Content);
         }
     });
 }

@@ -2,13 +2,15 @@ const username = 'admin';
 const password = 'admin';
 const shellyDefaultIp = '192.168.33.1';
 const wifiSsid = 'ShellyAP';
-const wifiPassword = 'shelly';
-const wifiGateway = "192.168.10.1"
-const wifiSubnet = "255.255.255.0"
+const wifiPassword = 'shellypass';
+const wifiGateway = "192.168.10.1";
+const wifiSubnet = "255.255.255.0";
+var gSsid = "";
+var gPassword = "";
 
 var request= require('request');
 var express = require('express');
-const wifi = require('node-wifi');
+const { exec } = require("child_process");
 var fs = require('fs');
 var app = express();
 
@@ -16,32 +18,115 @@ var app = express();
 const port = 3000
 const host = "0.0.0.0";
 
-// WLAN-Schnittstelle initialisieren
-wifi.init({
-  iface: null,
-});
+async function getWifiList(){
+  console.log("getWifiList");
+  return new Promise((resolve, reject) => {
+    exec("./GetWifiList.sh", (err, stdout, stderr) => {
+      if(err){
+        console.log(stderr);
+        reject(stderr);
+      }else{
+        console.log(stdout);
+        console.log("Liste erfolgreich geholt.");
+        const lines = stdout.trim().split("\n");
+        lines.shift();
+        const networks = lines.map(line => line.trim().split(/\s+/)[0]);
+        resolve(networks);
+      }
+    });
+  });
+}
+
+async function disconnectWifi(){
+  return new Promise((resolve, reject) => {
+    exec("./DisconnectWifi.sh", (err, stdout, stderr) => {
+        if(err){
+          console.log(err);
+          reject(stderr);
+        }else{
+          console.log(stdout);
+          console.log("Wifi getrennt.");
+        }
+    });
+  });
+}
+
+async function connectWifi(ssid, password){
+  return new Promise((resolve, reject) => {
+    exec("./ConnectWifi.sh "+ssid+" "+password, (err, stdout, stderr) => {
+        if(err){
+          console.log(err);
+          reject(stderr);
+        }else{
+          console.log(stdout);
+          console.log("Wifi verbunden.");
+          resolve(stdout);
+        }
+    });
+  });
+}
+
+async function stopHotspot(){
+  return new Promise((resolve, reject) => {
+    exec("./StopHotspot.sh", (err, stdout, stderr) => {
+        if(err){
+          console.log(err);
+          reject(stderr);
+        }else{
+          console.log(stdout);
+          console.log("Hotspot gestoppt.");
+          resolve(stdout);
+        }
+    });
+  });
+}
+
+async function startHotspot(){
+  return new Promise((resolve, reject) => {
+    exec("./StartHotspot.sh", (err, stdout, stderr) => {
+        if(err){
+          console.log(err);
+          reject(stderr);
+        }else{
+          console.log(stdout);
+          console.log("Hotspot gestartet.");
+          resolve(stdout);
+        }
+    });
+  });
+}
+
+startHotspot();
 
 async function configureShelly(ip) {
-  url = `http://${shellyDefaultIp}/rpc/WiFi.SetConfig?config={"sta":{"ssid":"${wifiSsid}","pass":"${wifiPassword}","enable":true,"ipv4mode":"dhcp"}}`;
-  console.log(url);
-  request(url, (error, response, body) => {
-    if (error) {
-      console.error(error);
-      return;
-    }
-    console.log(JSON.parse(body));
+  return new Promise((resolve, reject) => {
+    url = `http://${shellyDefaultIp}/rpc/WiFi.SetConfig?config={"sta":{"ssid":"${wifiSsid}","pass":"${wifiPassword}","enable":true,"ipv4mode":"static", "ip":ip, "netmask":wifiSubnet, "gw":wifiGateway, "nameserver":"8.8.8.8"}}`;
+    console.log(url);
+    request(url, (error, response, body) => {
+      if (error) {
+        console.error(error);
+        reject(error);
+      }else{
+        console.log(JSON.parse(body));
+        resolve(response);
+      }
+    });
   });
 }
 
 async function switchShelly(ip, direction, state) {
-  url = `http://${ip}/rpc/Switch.Set?id=${direction}&on=${state}`
-  console.log(url);
-  request(url, (error, response, body) => {
-    if (error) {
-      console.error(error);
-      return;
-    }
-    console.log(JSON.parse(body));
+  return new Promise((resolve, reject) => {
+    url = `http://${ip}/rpc/Switch.Set?id=${direction}&on=${state}`
+    console.log(url);
+    request(url, (error, response, body) => {
+      if (error) {
+        console.error(error);
+        reject(error);
+      }else{
+        console.log(JSON.parse(body));
+        resolve(response);
+      }
+    });
   });
 }
 
@@ -72,54 +157,40 @@ async function handleData(data) {
       }
       break;
     case "getNetworkList":
-      try {
-        const scanResults = await new Promise((resolve, reject) => {
-          wifi.scan((err, response) => {
-            if (err) reject(err);
-            resolve(response);
-          });
-        });
-        content = scanResults;
-        console.log(content);
-      } catch (error) {
-        console.error(error);
-        content = error.message;
-      }
+        try{
+          await stopHotspot();
+          const scanResults = await getWifiList(); 
+          content = scanResults;
+          await startHotspot();
+        }catch(err){
+          console.error(err);
+        }
       break;
     case "setNetwork":
-      try {
         console.log(content);
         content = JSON.parse(content);
         console.log(content);
-        const ssid = content["ssid"];
-        const password = content["password"];
-        console.log("Try set network " + ssid + "   " + password);
-        const connected = await new Promise((resolve, reject) => {
-          wifi.connect({ssid:ssid, password:password}, (err) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(true);
-            }
-          });
-        });
-        if (connected) {
-          content = "Connected to network " + ssid + ".";
-          console.log(content);
-        } else {
-          content = "Failed to connect to network " + ssid + ".";
-          console.log(content);
-        }
-      } catch (error) {
-        console.error(error);
-        content = error.message;
-      }
+        gSsid = content["ssid"];
+        gPassword = content["password"];
+        console.log("Set global network properties to " + gSsid + "   " + gPassword);
       break;    
     case "configureShelly":
-      await configureShelly(content)
+      try{
+        await stopHotspot();
+        await connectWifi(gSsid, gPassword);
+        await configureShelly(content);
+        await disconnectWifi();
+        await startHotspot();
+      }catch(err){
+        console.error(err);
+      }
       break;  
     case "switchShelly":
-      await switchShelly(content.ip, content.id, content.state)
+      try{
+        await switchShelly(content.ip, content.id, content.state);
+      }catch(err){
+        console.error(err);
+      }
       break;
     default:
       break;
@@ -131,7 +202,11 @@ async function sendJson(req, res){
   console.log('Request');
   data = req.query;
   console.log(data);
-  result = await handleData(data);
+  try{
+    result = await handleData(data);
+  }catch(err){
+    console.log(err);
+  }
   console.log(result);
   var jRes = {"Result" : result[0], "Content": result[1]};
   res.type('json');

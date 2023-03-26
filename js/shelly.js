@@ -20,7 +20,7 @@ class Shelly {
       }
     }
 
-    async switch(id, state){
+    async switchShelly(id, state){
       try {
         await switchShelly(this.ip, id, state)
       } catch (error) {
