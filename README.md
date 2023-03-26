@@ -3,10 +3,9 @@
 Setup
 
 1. At sudo nano /etc/xdg/lxsession/LXDE-pi/autostart add:
-	1.1 @sh /home/server/BlindControl/StartServer.sh
-	1.2 @sudo systemctl unmask  hostapd
-    1.3 @sudo systemctl start hostapd  
-	1.4 @sudo systemctl start NetworkManager
+	1.1 @sh /home/server/BlindControl/StartServer.sh 
+	
+1.2 Eventuell muss dnsmasq und hostapd installiert werden 
 
 
 2. At sudo nano /etc/dhcpcd.conf add

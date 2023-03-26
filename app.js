@@ -3,7 +3,7 @@ const password = 'admin';
 const shellyDefaultIp = '192.168.33.1';
 const wifiSsid = 'ShellyAP';
 const wifiPassword = 'shellypass';
-const wifiGateway = "192.168.10.1";
+const wifiGateway = "192.168.8.1";
 const wifiSubnet = "255.255.255.0";
 var gSsid = "";
 var gPassword = "";
@@ -23,7 +23,7 @@ async function getWifiList(){
   return new Promise((resolve, reject) => {
     exec("./GetWifiList.sh", (err, stdout, stderr) => {
       if(err){
-        console.log(stderr);
+        //console.log(stderr);
         reject(stderr);
       }else{
         console.log(stdout);
@@ -44,8 +44,9 @@ async function disconnectWifi(){
           console.log(err);
           reject(stderr);
         }else{
-          console.log(stdout);
+          //console.log(stdout);
           console.log("Wifi getrennt.");
+          resolve(stdout);
         }
     });
   });
@@ -58,7 +59,7 @@ async function connectWifi(ssid, password){
           console.log(err);
           reject(stderr);
         }else{
-          console.log(stdout);
+          //console.log(stdout);
           console.log("Wifi verbunden.");
           resolve(stdout);
         }
@@ -73,9 +74,9 @@ async function stopHotspot(){
           console.log(err);
           reject(stderr);
         }else{
-          console.log(stdout);
+          //console.log(stdout);
           console.log("Hotspot gestoppt.");
-          resolve(stdout);
+          setTimeout(()=>{resolve(stdout);}, 3000);
         }
     });
   });
@@ -88,9 +89,9 @@ async function startHotspot(){
           console.log(err);
           reject(stderr);
         }else{
-          console.log(stdout);
+          //console.log(stdout);
           console.log("Hotspot gestartet.");
-          resolve(stdout);
+          setTimeout(()=>{resolve(stdout);}, 3000);
         }
     });
   });
@@ -100,7 +101,7 @@ startHotspot();
 
 async function configureShelly(ip) {
   return new Promise((resolve, reject) => {
-    url = `http://${shellyDefaultIp}/rpc/WiFi.SetConfig?config={"sta":{"ssid":"${wifiSsid}","pass":"${wifiPassword}","enable":true,"ipv4mode":"static", "ip":ip, "netmask":wifiSubnet, "gw":wifiGateway, "nameserver":"8.8.8.8"}}`;
+    url = `http://${shellyDefaultIp}/rpc/WiFi.SetConfig?config={"sta":{"ssid":"${wifiSsid}","pass":"${wifiPassword}","enable":true,"ipv4mode":"static", "ip":"${ip}", "netmask":"${wifiSubnet}", "gw":"${wifiGateway}", "nameserver":"8.8.8.8"}}`;
     console.log(url);
     request(url, (error, response, body) => {
       if (error) {
@@ -230,7 +231,7 @@ app.get('/Update.sh', (req, res) => {
       console.error(err);
       res.send('Update failed');
     } else {
-      console.log(stdout);
+      //console.log(stdout);
       res.send('Update complete');
     }
   });

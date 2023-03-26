@@ -91,9 +91,9 @@ function CreateButton(htmlId, dialog){
     btn.style.marginTop = "50px";
     btn.onclick = blindClicked;
     c.appendChild(btn);
-    getNetworks()
     $("#blindIp").val(getAvailableIp);
     if(dialog){
+        getNetworks()
         $('#ModalBlind').modal('show');
     }
 }
