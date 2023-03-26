@@ -2,7 +2,7 @@ const username = 'admin';
 const password = 'admin';
 const shellyDefaultIp = '192.168.33.1';
 const wifiSsid = 'ShellyAP';
-const wifiPassword = '';
+const wifiPassword = 'shelly';
 const wifiGateway = "192.168.10.1"
 const wifiSubnet = "255.255.255.0"
 

@@ -174,12 +174,12 @@ function getNetworks(){
 }
 
 function getAvailableIp(){
-    let _blacklist = ["192.168.10.0", "192.168.10.1", "192.168.10.2", "192.168.10.3", "192.168.10.255"]
+    let _blacklist = ["192.168.8.0", "192.168.8.1", "192.168.8.255"]
     for(var blind of config.Blinds){
         _blacklist.push(blind.ip)
     }
     for(let i = 0; i < 256; i++){
-        _ip = `192.168.10.${i}`
+        _ip = `192.168.8.${i}`
         if(!_blacklist.includes(_ip)){
             return _ip
         }
