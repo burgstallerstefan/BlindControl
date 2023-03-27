@@ -6,10 +6,9 @@ class Shelly {
       this.network = network;
       this.ip = ip;
       console.log('Creating new Shelly with network:', network, 'and IP:', ip);
-      this.init()
     }
     
-    async init(){
+    async configShellyDevice(){
       try {
         await setNetwork(JSON.stringify(this.network));
         console.log('Network set successfully');

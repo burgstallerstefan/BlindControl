@@ -1,6 +1,8 @@
 var mode = 0;
 var currentId = 0;
 var clickedId = 0;
+var isStopped = true;
+var dir = direction.down;
 
 // Reset to normal mode if click anywhere
 document.addEventListener('click', function(event) {
@@ -31,23 +33,30 @@ getConfig();
 console.log(config);
 
 function _findBlind(htmlId){
+    console.log(htmlId);
+    console.log(config.Blinds);
     for(blind of config.Blinds){
         if("blind"+blind.htmlId === htmlId){
+            console.log("Blind "+blind.name+ " found.");
             return blind;
         }
     }
+    console.log("no blind found.");
     return null;
 }
 
 function blindClicked(event){
     var htmlId = event.target.id;
+    console.log("htmlId="+htmlId);
     var blind = _findBlind(htmlId)
+    console.log(blind);
     if(blind == null) return;
     clickedId = blind.htmlId;
     console.log("HtmlID = " + htmlId);
 
     switch(mode){
         case 0: /* Normal mode */
+            console.log("toggle "+ blind);
             blind.toggle()
             break;
         case 1: /* Info mode */    
@@ -148,6 +157,7 @@ function SaveChanges(htmlId, newBlind){
     var upTime = parseInt(document.getElementById("blindUpTime").value);
 
     var blind = new Blind(network, name, ip, upTime, downTime, currentId);
+    blind.configShellyDevice();
 
     if(newBlind){
         config["Blinds"].push(blind);
@@ -165,9 +175,19 @@ function SaveChanges(htmlId, newBlind){
 }
 
 function ToggleAll(event){
-    this.up = !this.up;
     var btn = event.target || event.srcElement; // IE
-    if(this.up){
+    // change direction if is stopped
+    if(this.isStopped){
+        if(direction == direction.up){
+            direction = direction.down;
+        }else{
+            direction = direction.up;
+        }
+    }
+    if(!isStopped){
+        stopAll();
+    }
+    else if(dir == direction.down){
         moveAllDown();
         btn.textContent = "UP"
     }else{

@@ -1,3 +1,4 @@
+const ABS_PATH = "/home/server/BlindControl";
 const username = 'admin';
 const password = 'admin';
 const shellyDefaultIp = '192.168.33.1';
@@ -23,7 +24,7 @@ async function getWifiList(){
   return new Promise((resolve, reject) => {
     exec("./GetWifiList.sh", (err, stdout, stderr) => {
       if(err){
-        //console.log(stderr);
+        console.log(stderr);
         reject(stderr);
       }else{
         console.log(stdout);
@@ -39,12 +40,12 @@ async function getWifiList(){
 
 async function disconnectWifi(){
   return new Promise((resolve, reject) => {
-    exec("./DisconnectWifi.sh", (err, stdout, stderr) => {
+    exec(ABS_PATH+"/DisconnectWifi.sh", (err, stdout, stderr) => {
         if(err){
           console.log(err);
           reject(stderr);
         }else{
-          //console.log(stdout);
+          console.log(stdout);
           console.log("Wifi getrennt.");
           resolve(stdout);
         }
@@ -54,12 +55,12 @@ async function disconnectWifi(){
 
 async function connectWifi(ssid, password){
   return new Promise((resolve, reject) => {
-    exec("./ConnectWifi.sh "+ssid+" "+password, (err, stdout, stderr) => {
+    exec(ABS_PATH+"/ConnectWifi.sh "+ssid+" "+password, (err, stdout, stderr) => {
         if(err){
           console.log(err);
           reject(stderr);
         }else{
-          //console.log(stdout);
+          console.log(stdout);
           console.log("Wifi verbunden.");
           resolve(stdout);
         }
@@ -69,12 +70,12 @@ async function connectWifi(ssid, password){
 
 async function stopHotspot(){
   return new Promise((resolve, reject) => {
-    exec("./StopHotspot.sh", (err, stdout, stderr) => {
+    exec(ABS_PATH+"/StopHotspot.sh", (err, stdout, stderr) => {
         if(err){
           console.log(err);
           reject(stderr);
         }else{
-          //console.log(stdout);
+          console.log(stdout);
           console.log("Hotspot gestoppt.");
           setTimeout(()=>{resolve(stdout);}, 3000);
         }
@@ -84,12 +85,12 @@ async function stopHotspot(){
 
 async function startHotspot(){
   return new Promise((resolve, reject) => {
-    exec("./StartHotspot.sh", (err, stdout, stderr) => {
+    exec(ABS_PATH+"/StartHotspot.sh", (err, stdout, stderr) => {
         if(err){
           console.log(err);
           reject(stderr);
         }else{
-          //console.log(stdout);
+          console.log(stdout);
           console.log("Hotspot gestartet.");
           setTimeout(()=>{resolve(stdout);}, 3000);
         }
@@ -134,12 +135,13 @@ async function switchShelly(ip, direction, state) {
 async function handleData(data) {
   var command = data["Command"];
   var content = data["Content"];
-  var filename = "Config.json";
+  var filename = ABS_PATH+"/Config.json";
 
   switch (command) {
     case "get":
       console.log("get");
       try {
+        console.log(filename);
         content = await fs.promises.readFile(filename, "utf8");
         console.log('Read file!');
       } catch (error) {
@@ -231,7 +233,7 @@ app.get('/Update.sh', (req, res) => {
       console.error(err);
       res.send('Update failed');
     } else {
-      //console.log(stdout);
+      console.log(stdout);
       res.send('Update complete');
     }
   });
