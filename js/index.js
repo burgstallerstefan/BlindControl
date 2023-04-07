@@ -1,62 +1,60 @@
 var mode = 0;
 var currentId = 0;
 var clickedId = 0;
-var isStopped = true;
-var dir = direction.down;
 
 // Reset to normal mode if click anywhere
 document.addEventListener('click', function(event) {
-    console.log(event)
+    //console.log(event)
     var dropdownButton = document.getElementById("Dropdown");
     var outsideClickDropdownButton = !dropdownButton.contains(event.target);
     var dropdown = document.getElementById("navbarToggleExternalContent");
     var outsideClickDropdown = !dropdown.contains(event.target);
     var outsideClickButtons = !event.target.id.includes("blind");
-    console.log("Outside dropdown: " + outsideClickDropdown);
-    console.log("Outside buttons: " + outsideClickButtons);
-    console.log("Previous mode: " + mode);
+    //console.log("Outside dropdown: " + outsideClickDropdown);
+    //console.log("Outside buttons: " + outsideClickButtons);
+    //console.log("Previous mode: " + mode);
     if(outsideClickDropdown && outsideClickDropdownButton && outsideClickButtons){
-        console.log("DeleteBlind");
-        console.log(config);
+        //console.log("DeleteBlind");
+        //console.log(config);
         for(blind of config.Blinds){
             var htmlId = "blind" + blind.htmlId;
             btn = document.getElementById(htmlId);
             btn.className = "btn btn-success";
         mode = 0;
     }
-    console.log("Mode: " + mode);
+    //console.log("Mode: " + mode);
     }
 });
 
 getConfig();
 
-console.log(config);
+//console.log(config);
 
 function _findBlind(htmlId){
-    console.log(htmlId);
-    console.log(config.Blinds);
+    //console.log(htmlId);
+    //console.log(config.Blinds);
     for(blind of config.Blinds){
         if("blind"+blind.htmlId === htmlId){
-            console.log("Blind "+blind.name+ " found.");
+            //console.log("Blind "+blind.name+ " found.");
             return blind;
         }
     }
-    console.log("no blind found.");
+    //console.log("no blind found.");
     return null;
 }
 
 function blindClicked(event){
     var htmlId = event.target.id;
-    console.log("htmlId="+htmlId);
+    //console.log("htmlId="+htmlId);
     var blind = _findBlind(htmlId)
-    console.log(blind);
+    //console.log(blind);
     if(blind == null) return;
     clickedId = blind.htmlId;
-    console.log("HtmlID = " + htmlId);
+    //console.log("HtmlID = " + htmlId);
 
     switch(mode){
         case 0: /* Normal mode */
-            console.log("toggle "+ blind);
+            //console.log("toggle "+ blind);
             blind.toggle()
             break;
         case 1: /* Info mode */    
@@ -73,10 +71,10 @@ function blindClicked(event){
             DeleteButton(htmlId);
             for(blind of config.Blinds){
                 if("blind"+blind.htmlId == htmlId){
-                    console.log("ID " + htmlId + "found.");
+                    //console.log("ID " + htmlId + "found.");
                     index = config.Blinds.indexOf(blind);
-                    console.log("Index = " + index);
-                    console.log(config);
+                    //console.log("Index = " + index);
+                    //console.log(config);
                     config.Blinds.splice(index, 1);
                     updateConfigJson();
                     break;
@@ -108,7 +106,7 @@ function CreateButton(htmlId, dialog){
 }
 
 function DeleteButton(htmlId){
-    console.log("Delete button " + htmlId);
+    //console.log("Delete button " + htmlId);
     var btn = document.getElementById(htmlId);
     btn.remove();
 }
@@ -123,8 +121,8 @@ function Overview(){
 }
 
 function DeleteBlind(){
-    console.log("DeleteBlind");
-    console.log(config)
+    //console.log("DeleteBlind");
+    //console.log(config)
     for(blind of config.Blinds){
         var htmlId = "blind" + blind.htmlId;
         btn = document.getElementById(htmlId);
@@ -134,8 +132,8 @@ function DeleteBlind(){
 }
 
 function Info(){
-    console.log("DeleteBlind");
-    console.log(config)
+    //console.log("DeleteBlind");
+    //console.log(config)
     for(blind of config.Blinds){
         var htmlId = "blind" + blind.htmlId;
         btn = document.getElementById(htmlId);
@@ -174,28 +172,6 @@ function SaveChanges(htmlId, newBlind){
     updateConfigJson();
 }
 
-function ToggleAll(event){
-    var btn = event.target || event.srcElement; // IE
-    // change direction if is stopped
-    if(this.isStopped){
-        if(direction == direction.up){
-            direction = direction.down;
-        }else{
-            direction = direction.up;
-        }
-    }
-    if(!isStopped){
-        stopAll();
-    }
-    else if(dir == direction.down){
-        moveAllDown();
-        btn.textContent = "UP"
-    }else{
-        moveAllUp();
-        btn.textContent = "DOWN"
-    }
-}
-
 function UpdateClock() {
     var now = new Date()
     var month = now.getMonth() + 1
@@ -214,7 +190,7 @@ function Update() {
 	  url: 'http://'+serverIp+':'+port+'//Update.sh',
 	  type: 'GET',
 	  success: function (result) {
-		console.log(result);
+		//console.log(result);
 		alert(result);
 	  }
 	});

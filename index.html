@@ -19,12 +19,14 @@
         <span class="navbar-toggler-icon"></span>
       </button>
       <label id="dat" class="dateAndTime">00:00 00.00.0000</label>
-      <button class = "btn btn-success" onclick="ToggleAll(event);" style="width:20%">DOWN</button>
+      <button class = "btn btn-success" id = "ToggleAll" onclick="ToggleAll(event);" style="width:20%">DOWN</button>
     </nav>
     <div class="collapse" id="navbarToggleExternalContent">
       <div class="bg-light p-4">
         <a class="dropdown-item" href="#" onclick="CreateButton('blind'+currentId, true);">New Blind</a>
         <a class="dropdown-item" href="#" onclick="DeleteBlind();">Delete Blind</a>
+        <a class="dropdown-item" href="#" onclick="AllOnTop();">All blinds on top</a>
+        
         <!--<a class="dropdown-item" href="#" onclick="Info();">Info</a> -->
         <!--<a class="dropdown-item" href="#" onclick="Overview();">Overview</a> -->
         <!--<a class="dropdown-item" href="#" onclick="Update();">Update</a>-->

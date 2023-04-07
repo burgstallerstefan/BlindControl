@@ -15,7 +15,6 @@ const { exec } = require("child_process");
 var fs = require('fs');
 var app = express();
 
-
 const port = 3000
 const host = "0.0.0.0";
 
@@ -110,7 +109,7 @@ async function configureShelly(ip) {
         reject(error);
       }else{
         console.log(JSON.parse(body));
-        resolve(response);
+        resolve(JSON.parse(body));
       }
     });
   });
@@ -126,7 +125,22 @@ async function switchShelly(ip, direction, state) {
         reject(error);
       }else{
         console.log(JSON.parse(body));
-        resolve(response);
+        resolve(JSON.parse(body));
+      }
+    });
+  });
+}
+
+async function isInput(ip, direction) {
+  return new Promise((resolve, reject) => {
+    url = `http://${ip}/rpc/Input.GetStatus?id=${direction}`
+    console.log(url);
+    request(url, (error, response, body) => {
+      if (error) {
+        console.error(error);
+        reject(error);
+      }else{
+        resolve(JSON.parse(body));
       }
     });
   });
@@ -195,6 +209,14 @@ async function handleData(data) {
         console.error(err);
       }
       break;
+    case "isInput":
+      try{
+        content = await isInput(content.ip, content.id);
+        console.log("IsinputContent="+content);
+      }catch(err){
+        console.error(err);
+      }
+      break;
     default:
       break;
   }
@@ -204,7 +226,7 @@ async function handleData(data) {
 async function sendJson(req, res){
   console.log('Request');
   data = req.query;
-  console.log(data);
+  //console.log(data);
   try{
     result = await handleData(data);
   }catch(err){

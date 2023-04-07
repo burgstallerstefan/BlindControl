@@ -1,12 +1,14 @@
 var config = {};
 config["User"] = {};
 config["Blinds"] = [];
-ip = "localhost"
+ip = "localhost";
 
 const direction = {
     up: 0,
     down: 1
-  }
+}
+
+dir = direction.up;
   
 const setExactTimeout = function(callback, duration, resolution){
     const start = (new Date()).getTime();
@@ -36,14 +38,43 @@ class Blind extends Shelly{
         this.timer = null;
         this.timerStartedTimestamp = 0;
         this.direction = direction.down;
-        this.isStopped = true;
+        this.isStopped = true
+        this.pollInput = setInterval(function(){
+            //console.log("Polling");
+            this.manualMove();
+        }.bind(this),100)
+    }
+    
+    async manualMove(){
+      try{
+      var _isUp = await this.isInput(direction.up);
+      var _isDown = await this.isInput(direction.down);
+      //console.log(_isUp);
+      //console.log(_isUp);
+      if(((_isUp!=true) && this.prevUp) || ((_isDown!=true) && this.prevDown)){
+        this.stop();
+        console.log("MANUALLY STOPPED");
+      }
+      else if(_isUp && (this.prevUp!=true)){
+          console.log("MANUALLY MOVE UP");
+          this.moveUp();
+      }
+      else if(_isDown && (this.prevDown!=true)){
+        console.log("MANUALLY MOVE DOWN");
+        this.moveDown();
+      }
+      
+      this.prevUp = _isUp;
+      this.prevDown = _isDown;
+    }catch{}
     }
 
     startTimer(timeRemaining) {
+        if(timeRemaining<=0) return;
         console.log("Timer started with " + timeRemaining + "s.");
         this.timerStartedTimestamp = Date.now();
         this.timer = setExactTimeout(() => {
-            this.stop();            
+            this.stop();        
         }, timeRemaining*1000, 10);
     }
 
@@ -77,16 +108,17 @@ class Blind extends Shelly{
     
     calcRemainingTime(){
         var tp = (Date.now()-this.timerStartedTimestamp); // passed time since timer has started
-        console.log("Time passed since timer started " + tp +"ms.");
-        if(this.direction == direction.down){
-            this.uptimeLeft = this.uptime-tp;
-            this.downtimeLeft = (tp/this.uptime) * this.downtime;
+        tp = tp/1000;
+        console.log("Time passed since timer started " + tp +"s.");
+        if(this.direction == direction.up){
+            this.uptimeLeft -= tp;
+            this.downtimeLeft += tp * (this.downtime/this.uptime);
             console.log("Downtime left: "+this.downtimeLeft+".");
             console.log("Uptime left: "+this.uptimeLeft+".");
             
         }else{
-            this.downtimeLeft = this.downtime-tp;
-            this.uptimeLeft = (tp/this.downtime) * this.uptime;
+            this.downtimeLeft -= tp;
+            this.uptimeLeft += tp * (this.uptime/this.downtime);
             console.log("Downtime left: "+this.downtimeLeft+".");
             console.log("Uptime left: "+this.uptimeLeft+".");
         }
@@ -99,11 +131,13 @@ class Blind extends Shelly{
     }
 
     stop(){
+        if(this.isStopped) return;
         var d = "down";
         if(this.direction == direction.up){
             d = "up";
         }
         console.log(`STOP ${this.name} ${this.ip} - Direction was ${d}.`);
+        
         this.stopTimer()
         this.switchShelly(direction.up, false);
         this.switchShelly(direction.down, false);
@@ -134,7 +168,7 @@ class Blind extends Shelly{
 function moveAllDown(){
     for(blind of config.Blinds){
         if(!blind.isStopped){
-            this.stop()
+            blind.stop();
         }
         blind.moveDown();
     }
@@ -143,7 +177,7 @@ function moveAllDown(){
 function moveAllUp(){
     for(blind of config.Blinds){
         if(!blind.isStopped){
-            this.stop()
+            blind.stop();
         }
         blind.moveUp();
     }
@@ -151,7 +185,54 @@ function moveAllUp(){
 
 function stopAll(){
     for(blind of config.Blinds){
-        this.stop()
+        blind.stop()
+    }
+}
+
+function isStoppedAll(){
+    for(blind of config.Blinds){
+        if(!blind.isStopped){
+            console.log("Not all stopped");
+            return false;
+        }
+    }
+    console.log("All stopped");
+    return true;
+}
+
+function ToggleAll(event){
+    var btn = event.target || event.srcElement; // IE
+
+    if(isStoppedAll()){
+        if(dir== direction.up){
+            dir = direction.down;
+            btn.textContent = "UP"
+        }else{
+            dir = direction.up;
+            btn.textContent = "DOWN"
+        }
+    }
+    if(!isStoppedAll()){
+        stopAll();
+    }
+    else if(dir== direction.down){
+        moveAllDown();
+    }else{
+        moveAllUp();
+    }
+}
+
+function AllOnTop(){
+    console.log("All on top!");
+    document.getElementById("ToggleAll").textContent = "DOWN"
+    dir = direction.up;
+    for(blind of config.Blinds){
+        blind.switchShelly(direction.down, false);
+        blind.switchShelly(direction.up, true);
+        blind.uptimeLeft = 0;
+        blind.downtimeLeft = blind.downtime;
+        blind.direction = direction.up
+        blind.isStopped = true;
     }
 }
 
@@ -193,7 +274,7 @@ function updateConfigJson(){
         data: data,
         dataType: 'json',
         success: function(resp){
-                console.log(resp.Content);
+                //console.log(resp.Content);
             }
     });
 }
@@ -261,12 +342,13 @@ async function configure(shellyIp){
         dataType: 'text',
         success: function(resp){
             console.log(resp.Content);
+            window.alert("Done.");
         }
     });
 }
 
 async function switchShelly(shellyIp, id, state){
-    console.log("switchShelly")
+    //console.log("switchShelly")
     var data = {};
     data["Command"] = "switchShelly";
     data["Content"] = {ip:shellyIp,id:id,state:state};
@@ -276,7 +358,32 @@ async function switchShelly(shellyIp, id, state){
         data: data,
         dataType: 'json',
         success: function(resp){
-            console.log(resp.Content);
+            //console.log(resp.Content);
         }
     });
 }
+
+
+async function isInput(shellyIp, id){
+    return new Promise((resolve, reject) =>{
+        //console.log("isInput")
+        var data = {};
+        data["Command"] = "isInput";
+        data["Content"] = {ip:shellyIp,id:id};
+        $.ajax({
+            url: "http://"+serverIp+":"+port+"/shelly",
+            type: "GET",
+            data: data,
+            dataType: 'json',
+            success: function(resp){
+                //console.log("IsInputState="+resp.Content.state);
+                resolve(resp.Content.state);
+            },
+            error: function(resp){
+                //console.log("IsInputStateError="+resp);
+                reject(resp);
+            }
+        });
+    });
+}
+

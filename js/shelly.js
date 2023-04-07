@@ -26,4 +26,13 @@ class Shelly {
         console.log(error);
       }
     }
+    
+    
+    async isInput(id){
+      try {
+        return await isInput(this.ip, id);
+      } catch (error) {
+        //console.log(error);
+      }
+    }
   }
